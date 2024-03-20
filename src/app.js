@@ -4,13 +4,16 @@ const express = require("express");
 const server = express();
 const userRoutes = require("../src/user/userRouter")
 
+
 // Conexión a Base de Datos
 require("../db/db.config")
 
 const PORT = process.env.PORT || 3030;
 
 // Middleware 
-server.use(express.static(path.join(__dirname, "public")))
+server.use(express.static("public"))
+server.use(express.static("src/storage"))
+// server.use(express.static("storage"))
 server.use(express.json())
 server.use(express.urlencoded({extended:true}))
 // Router

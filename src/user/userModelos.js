@@ -61,10 +61,20 @@ const deleteUser = async (id) => {
   }
 };
 
+const login = async(email) =>{
+  const query = `SELECT * FROM user WHERE email= "${email}"`;
+  try {
+    return loginUsers = await connections.query(query)
+  } catch (error) {
+    return {error: error.code}
+  }
+}
+
 module.exports = {
   getAllUsers,
   getUserById,
   createNewUsers,
   updateUser,
   deleteUser,
+  login
 }

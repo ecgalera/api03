@@ -5,7 +5,11 @@ const {
   createNewUsers,
   updateUser,
   deleteUser,
+  login
 } = require("./userModelos");
+const { hashPassword, checkPassword } = require("../util/handlerPassword.js");
+require("dotenv").config();
+const fs = require("node:fs")
 
 const allUsers = async (req, res, next) => {
   const dbResponse = await getAllUsers();
@@ -21,21 +25,26 @@ const userById = async (req, res, next) => {
 };
 
 const addUser = async (req, res, next) => {
-  const { id, name, email, password } = req.body;
-  const dbResponse = await createNewUsers({ id, name, email, password });
-  if(dbResponse instanceof Error) {return next()}else{
-    res.status(200).json(`El usuario ${req.body.name} fue creado !!!`)
-  };
-  };
-  
+  const image = `${process.env.public_url}/${req.file.filename}`;
+  const password = await hashPassword(req.body.password);
+  const dbResponse = await createNewUsers({ ...req.body, password, image });
+  if (dbResponse instanceof Error) {
+    return next();
+  } else {
+    res.status(200).json(`El usuario ${req.body.name} fue creado !!!`);
+  }
+};
 
 
 const upUser = async (req, res, next) => {
   notNumber(+req.params.id, next);
-  const dbResponse = await updateUser(+req.params.id, { ...req.body });
+  const image = `${process.env.public_url}/${req.file.filename}`
+  const password = await hashPassword(req.body.password);
+  const dbResponse = await updateUser(+req.params.id, {...req.body, password,image});
   if (dbResponse instanceof Error) return next(dbResponse);
   dbResponse.affectedRows ? res.status(200).json(req.body) : next();
 };
+
 
 const userDelete = async (req, res, next) => {
   const dbResponse = await deleteUser(+req.params.id);
@@ -47,11 +56,29 @@ const userDelete = async (req, res, next) => {
     : next();
 };
 
+const loginUser = async (req, res, next) =>{
+  const dbResponse = await login(req.body.email);
+  const passwordMatch = await checkPassword(req.body.password, dbResponse[0].password);
+  if(passwordMatch){
+    res.redirect(302,"/user")
+  }else{
+    let error = new Error("Unauthorized");
+    error.status = 401;
+    next();
+  }
+  
+}
+
 module.exports = {
   allUsers,
   userById,
   addUser,
   upUser,
   userDelete,
+  loginUser
 };
+
+
+
+
 
