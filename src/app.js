@@ -3,6 +3,8 @@ const path = require("path")
 const express = require("express");
 const server = express();
 const userRoutes = require("../src/user/userRouter")
+const routerPosts = require("../src/posts/postsRouter")
+const morgan = require("morgan")
 
 
 // Conexión a Base de Datos
@@ -16,8 +18,10 @@ server.use(express.static("src/storage"))
 // server.use(express.static("storage"))
 server.use(express.json())
 server.use(express.urlencoded({extended:true}))
+server.use(morgan("dev"))
 // Router
 server.use("/user", userRoutes);
+server.use("/posts", routerPosts)
 
 server.listen(PORT, (err)=>{
     err 

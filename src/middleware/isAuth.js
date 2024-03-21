@@ -1,14 +1,14 @@
-const { tokenVerify, tokenVerify } = require("../util/handlerToken");
+const { tokenVerify } = require("../util/handlerToken");
 
 const isAuth = async (req, res, next) => {
   try {
-    if (!req.header.authorization) {
+    if (!req.headers.authorization) {
       let error = new Error("No token");
-      error.status = 401;
+      error.status = 403;
       return next(error);
     }
 
-    const token = req.header.authorization.split(" ").pop();
+    const token = req.headers.authorization.split(" ").pop();
     const validToken = await tokenVerify(token);
     console.log(validToken)
 
@@ -21,6 +21,7 @@ const isAuth = async (req, res, next) => {
     req.user = validToken;
     console.log(req.user)
     next();
+    
   } catch (error) {
     error.status = 401;
     error.message = "Rechazado";
